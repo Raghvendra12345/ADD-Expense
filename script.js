@@ -1,77 +1,47 @@
-const ul = document.createElement("ul");
-document.body.appendChild(ul);
 
-// load expenses on page load
-window.addEventListener("DOMContentLoaded", loadExpenses);
+window.addEventListener("DOMContentLoaded",initialize);
+function initialize() {
+  const ul = document.querySelector("ul");
+  ul.innerHTML = ""; // clear list before rendering
 
-document.querySelector("button").addEventListener("click", addExpense);
-
-function addExpense(e) {
-  e.preventDefault();
-
-  const amount = document.getElementById("number").value;
-  const description = document.getElementById("text").value;
-  const category = document.getElementById("category").value;
-
-  if (!amount || !description) return;
-
-  const expense = {
-    id: Date.now(),
-    amount,
-    description,
-    category
-  };
-
-  const expenses = getExpenses();
-  expenses.push(expense);
-  localStorage.setItem("expenses", JSON.stringify(expenses));
-
-  displayExpense(expense);
-  clearInputs();
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i); // email
+    const expense = JSON.parse(localStorage.getItem(key));
+    displayy(expense,key);
+  }
 }
 
-function loadExpenses() {
-  const expenses = getExpenses();
-  expenses.forEach(displayExpense);
+
+function handleFormSubmit(event){
+   event.preventDefault();
+   const amount=event.target.amount.value
+   const description=event.target.description.value
+   const category=event.target.category.value
+
+   const obj={amount,description,category}
+   const stringobj=JSON.stringify(obj)
+   const idd=Date.now()
+   localStorage.setItem(idd,stringobj)
+
+   displayy(obj,idd)
 }
 
-function displayExpense(expense) {
-  const li = document.createElement("li");
-  li.id = expense.id;
+function displayy(obj,id){
+    const ul=document.querySelector('ul')
+    const li=document.createElement('li')
 
-  li.innerHTML = `
-    ${expense.amount} - ${expense.description} - ${expense.category}
-    <button onclick="editExpense(${expense.id})">Edit</button>
-    <button onclick="deleteExpense(${expense.id})">Delete</button>
-  `;
+    li.textContent=obj.amount+" "+obj.description+" "+obj.category
 
-  ul.appendChild(li);
-}
+    const deletebtn=document.createElement('button')
+    const deletevalue=document.createTextNode("Delete")
+    deletebtn.appendChild(deletevalue)
+  
+    li.appendChild(deletebtn)
+    
+    deletebtn.addEventListener("click",(event)=>{
+        li.remove();
+        localStorage.removeItem(id)
+    })
+    ul.appendChild(li)
 
-function deleteExpense(id) {
-  let expenses = getExpenses();
-  expenses = expenses.filter(exp => exp.id !== id);
-  localStorage.setItem("expenses", JSON.stringify(expenses));
-
-  document.getElementById(id).remove();
-}
-
-function editExpense(id) {
-  const expenses = getExpenses();
-  const expense = expenses.find(exp => exp.id === id);
-
-  document.getElementById("number").value = expense.amount;
-  document.getElementById("text").value = expense.description;
-  document.getElementById("category").value = expense.category;
-
-  deleteExpense(id);
-}
-
-function getExpenses() {
-  return JSON.parse(localStorage.getItem("expenses")) || [];
-}
-
-function clearInputs() {
-  document.getElementById("number").value = "";
-  document.getElementById("text").value = "";
 }
